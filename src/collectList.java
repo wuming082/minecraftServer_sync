@@ -16,7 +16,7 @@ class PingExample {
     }
 }
 public class collectList {
-    //用于中转
+    //用于中转（将mod清单以及下载URL清单进行转存）
     public static List<String> ModeListIntUrlTmp = new ArrayList<>();
     public static List<String> ModeListIntTmp = new ArrayList<>();
     //用于记录间隔
@@ -48,7 +48,7 @@ public class collectList {
             status.HMCLUrl = ModeListIntUrlTmp.get(0);
             for(int i = 1 ; i < ModeListIntUrlTmp.size() ; i++){
                 System.out.println(ModeListIntTmp.get(i) + "\n");
-                //进行赋值转移数据
+                //进行转移数据
                 status.ModeListIntUrl.add(ModeListIntUrlTmp.get(i));
                 status.ModeListInt.add(ModeListIntTmp.get(i));
             }
@@ -86,19 +86,6 @@ public class collectList {
             System.out.println("网络连接失败，请检查连接失败原因");
             return false;
         }
-    }
-
-    public static void main(String[] args) {
-        File desktop = new File("E:\\MC1.18.2整合包\\.minecraft\\mods");
-        String[] arr = desktop.list();
-        List<String> ModeList = new ArrayList<>();
-        for (String fileName : arr) {
-            if (fileName.endsWith(".jar")) {
-                //System.out.println(fileName);
-                ModeList.add(fileName);
-            }
-        }
-        System.out.println(ModeList);
     }
     //本地收集
     public static boolean collecLocation(){
