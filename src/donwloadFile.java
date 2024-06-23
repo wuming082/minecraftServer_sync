@@ -24,7 +24,7 @@ public class donwloadFile {
         }
         return true;
     }
-    //下载函数
+    //下载函数(常用下载HMCL启动器
     static String downloadFileHmclYD(String fileUrl, File targetDirectory) throws IOException {
         URL url = new URL(fileUrl);
         String fileName = url.getFile();
