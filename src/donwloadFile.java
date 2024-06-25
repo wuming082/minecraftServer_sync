@@ -24,7 +24,7 @@ public class donwloadFile {
         }
         return true;
     }
-    //下载函数(常用下载HMCL启动器
+    //下载函数
     static String downloadFileHmclYD(String fileUrl, File targetDirectory) throws IOException {
         URL url = new URL(fileUrl);
         String fileName = url.getFile();
@@ -50,7 +50,7 @@ public class donwloadFile {
             file.delete();
             System.out.println("HMCL下载完成");
         }catch (Exception e){
-            System.out.println("解压出错，请查询原因：" + e.getMessage());;
+            System.out.format("\033[31m%s\033[0m%n", "解压出错，请查询原因：" + e.getMessage());
         }
         return zipfilename;
     }

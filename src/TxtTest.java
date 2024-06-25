@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class synchronousTxtTest {
+public class TxtTest {
     //外部MODE清单
     public static List<String> ModeListInt = new ArrayList<>();
     //外部MODEUrl清单

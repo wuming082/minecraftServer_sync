@@ -140,7 +140,7 @@ public class FindCom {
                 System.out.format("\033[32m%s\033[0m%n",status.ModeListLocationCreat.get(i));
             }
             try{
-                Thread.sleep(3000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

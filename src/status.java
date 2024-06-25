@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class status {
-    public static String version = "v0.9.3";
+    public static String version = "v0.9.4";
     public static boolean Updataoption = false;
     public static File WorkDirectory= new File(System.getProperty("user.dir"));
     public static File WorkModeDirectory= new File(WorkDirectory.toString()+"\\.minecraft\\mods");

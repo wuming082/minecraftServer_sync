@@ -28,9 +28,9 @@ public class DirectoryMkdir {
             System.out.println("修复成功！");
         }
     }
-    //通用创建方法
-    public static void modeMkdirFile(String filename){//在总工作区域安装
-        Path dirPath = Paths.get(status.WorkDirectory.toString() + "\\" + filename);
+    //通用创建文件夹方法
+    public static void modeMkdirFile(String Filedestination){//在总工作区域安装
+        Path dirPath = Paths.get(status.WorkDirectory.toString() + "\\" + Filedestination);
         try {
             Path createdDir = Files.createDirectory(dirPath);
         } catch (IOException e) {
