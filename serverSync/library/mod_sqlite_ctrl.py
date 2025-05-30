@@ -268,8 +268,8 @@ if __name__ == "__main__":
     #     modlink_name="4OZ1nvQVtCBwxyu")
 
     # 注册生成相应的mod库 有备注
-    # remark = "暮色森林存档"
-    # print(f"modListID:{mod_sqlite_handler._generate_file(remark=remark)}")
+    remark = "暮色森林存档"
+    print(f"modListID:{mod_sqlite_handler._generate_file(remark=remark)}")
 
     # 注册生成相应的mod库 无备注
     # print(f"modListID:{mod_sqlite_handler._generate_file()}")
