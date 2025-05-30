@@ -25,6 +25,8 @@ class ModHandleSqlite:
     # 检查是存在当前目录的环境
     def _path_check(self, workPath):
 
+        if workPath == None:
+            return False
         # 形成目录地址
         path = Path(workPath)
 
@@ -57,7 +59,7 @@ class ModHandleSqlite:
         return path
 
     # 进行初始赋值
-    def value_init_setpath(self, workPath):
+    def value_init_setpath(self, workPath=None):
         self.mod_list_path = self._mod_list_path_value(workPath)
         print(self.mod_list_path)
         self.sqlite_path = self._sqlite_path_value()
@@ -75,22 +77,38 @@ class ModHandleSqlite:
             return self.mod_list_path
 
     # 生成相应的mod列表
-    def _insert_modlist_sqlite(self, user_mangerID, mod_libraryLink):
-        try:
-            conn = sqlite3.connect(self.sqlite_path + "/" + self.database_name)
-            process = conn.cursor()
-            process.execute(f"""
-                INSERT INTO {self.table_list[0]} (user_manger_id, mod_library_link)
-                VALUES (?, ?)  
-            """, (user_mangerID, mod_libraryLink))
-            conn.commit()
-            conn.close()
-        except Exception as e:
-            print(f"INSERT ERROR SQLITE:{e}")
+    def _insert_modlist_sqlite(self, user_mangerID, mod_libraryLink, summary_mod_library=None):
+
+        if summary_mod_library == None:
+            try:
+                conn = sqlite3.connect(self.sqlite_path + "/" + self.database_name)
+                process = conn.cursor()
+                process.execute(f"""
+                    INSERT INTO {self.table_list[0]} (user_manger_id, mod_library_link)
+                    VALUES (?, ?)  
+                """, (user_mangerID, mod_libraryLink))
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                print(f"INSERT ERROR SQLITE:{e}")
+        else:
+            try:
+                conn = sqlite3.connect(
+                    self.sqlite_path + "/" + self.database_name)
+                process = conn.cursor()
+                process.execute(f"""
+                    INSERT INTO {self.table_list[0]} (user_manger_id, mod_library_link,information_mod_library)
+                    VALUES (?, ?, ?)  
+                """, (user_mangerID, mod_libraryLink,summary_mod_library))
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                print(f"INSERT ERROR SQLITE:{e}")
+
 
     # 生成10位id名称文件
 
-    def _generate_file(self):
+    def _generate_file(self,remark=None):
         # 生成包含大小写字母 + 数字的8字符字符串
         # 如果工作目录没有被创建，则报错
         if self.mod_list_path_set == False:
@@ -99,7 +117,10 @@ class ModHandleSqlite:
         unique_name = ''.join(secrets.choice(characters) for _ in range(15))
         new_path = Path(self.mod_list_path + f'/{unique_name}')
         os.mkdir(new_path)
-        self._insert_modlist_sqlite(0, unique_name)
+        if remark == None:
+            self._insert_modlist_sqlite(0, unique_name)
+        else:
+            self._insert_modlist_sqlite(0, unique_name,remark)
         print(f"new file:{new_path}")
         return unique_name
 
@@ -123,7 +144,6 @@ class ModHandleSqlite:
     def _sqlite_build_init_select_modlist(self, tableName):
 
         destnation_path = f"{self.sqlite_path}/{self.database_name}"
-
         try:
             # 连接数据库
             conn = sqlite3.connect(destnation_path)
@@ -133,7 +153,8 @@ class ModHandleSqlite:
                 CREATE TABLE IF NOT EXISTS {tableName} (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_manger_id INTEGER,
-                    mod_library_link TEXT NOT NULL
+                    mod_library_link TEXT NOT NULL,
+                    information_mod_library TEXT
                 )
             ''')
             conn.commit()
@@ -175,6 +196,24 @@ class ModHandleSqlite:
             rows = process.fetchall()
             mod_have = []
             for row in rows:
+                mod_have.append(row)
+            
+            print(mod_have)
+
+        except Exception as e:
+            print(f"SELECT ERROR FROM{self.table_list[0]} ERROR:{e}")
+
+    def _get_all_table_modlist(self):
+        try:
+            conn = sqlite3.connect(self.sqlite_path + "/" + self.database_name)
+            process = conn.cursor()
+
+            process.execute(f"""
+                SELECT* FROM {self.table_list[0]};
+            """)
+            rows = process.fetchall()
+            mod_have = []
+            for row in rows:
                 mod_have.append(row[2])
             return mod_have
 
@@ -185,7 +224,6 @@ class ModHandleSqlite:
     def _delete_sqlite_table_modlist_one(self, modlink_name):
         
         try:
-            
             # 删除数据库元素
             conn = sqlite3.connect(self.sqlite_path + "/" + self.database_name)
             process = conn.cursor()
@@ -210,16 +248,34 @@ class ModHandleSqlite:
 
     # 删除modlist表当中的所有mod库
     def _delete_sqlite_table_modlist_all(self):
-        print("delete all")
+        # 获取所有内部mod库清单
+        mod_list = self._get_all_table_modlist()
+
+        for mod in mod_list:
+            self._delete_sqlite_table_modlist_one(modlink_name=str(mod))
+
 
 
 mod_sqlite_handler = ModHandleSqlite()
 
 if __name__ == "__main__":
 
-    mod_sqlite_handler.value_init_setpath(workPath="")
+    # 初始化mod_manger （必要）
+    mod_sqlite_handler.value_init_setpath()
 
+    # 删除单独相应的mod库
     # mod_sqlite_handler._delete_sqlite_table_modlist_one(
     #     modlink_name="4OZ1nvQVtCBwxyu")
+
+    # 注册生成相应的mod库 有备注
+    # remark = "暮色森林存档"
+    # print(f"modListID:{mod_sqlite_handler._generate_file(remark=remark)}")
+
+    # 注册生成相应的mod库 无备注
     # print(f"modListID:{mod_sqlite_handler._generate_file()}")
-    mod_sqlite_handler._show_all_table_modlist()
+
+    # 打印所有的mod库名单
+    # mod_sqlite_handler._show_all_table_modlist()
+
+    # 删除所有的mod库
+    # mod_sqlite_handler._delete_sqlite_table_modlist_all()
