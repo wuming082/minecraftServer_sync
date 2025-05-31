@@ -6,6 +6,7 @@ import sqlite3
 import secrets
 import string
 import threading
+import asyncio
 import shutil
 
 
@@ -14,13 +15,21 @@ class ModHandleSqlite:
         self.mod_list_path = ""
         self.sqlite_path = ""
 
-        self.table_list = ["mod_library", "user_account"]
+        self.table_list = ["mod_library", "user_account","user_link"]
         self.database_name = "minecraft_sync.db"
 
         print(self.mod_list_path)
 
         self.mod_list_path_set = False
         self.mod_sqlite_set = False
+
+    def get_table_list(self):
+        return self.table_list
+
+    # 提取相应的sqlite数据文件目录
+    def get_sqlite_path_list(self):
+        # 额外的数据逻辑
+        return self.sqlite_path,self.database_name
 
     # 检查是存在当前目录的环境
     def _path_check(self, workPath):
@@ -69,7 +78,7 @@ class ModHandleSqlite:
         self._sqlite_build_init_all_aio()
 
     # 获取存放mod文件夹的工作地址
-    def get_mod_path(self):
+    def _get_mod_path(self):
         if self.mod_list_path == "" or self.mod_list_path_set == False:
             self.value_init_setpath()
             return self.mod_list_path
@@ -179,7 +188,9 @@ class ModHandleSqlite:
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {tableName} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                internet_token INTEGER NOT NULL
+                username TEXT NOT NULL,
+                internet_token INTEGER NOT NULL,
+                password TEXT NOT NULL
             )
         ''')
         conn.commit()
@@ -235,7 +246,7 @@ class ModHandleSqlite:
             conn.close()
 
             # 删除相应的实体库
-            delete_mod_path = self.get_mod_path() + "/" + modlink_name
+            delete_mod_path = self._get_mod_path() + "/" + modlink_name
             if Path(delete_mod_path).exists():
                 shutil.rmtree(delete_mod_path)
                 print(f"delete file:{modlink_name}")
@@ -254,7 +265,97 @@ class ModHandleSqlite:
         for mod in mod_list:
             self._delete_sqlite_table_modlist_one(modlink_name=str(mod))
 
+    # 返回相应mod仓库的当前清单
+    def _information_collection(self, select_mod_library=None, detailed=False):
+        """
+        select_mod_library:选择指定仓库如果没有选择指定仓库，默认返回有所仓库名单
+        detailed:是否打印mod仓库的详细信息 True False
+        """
+        if select_mod_library == None:
+            # 索引所有相应的mod仓库 待补全
+            return None
+        else:
+            # 索引明确指定的仓库
+            path = self._get_mod_path() + "/" + select_mod_library
+            if Path(path).exists():
+                # 仓库存在 检索相应的mod
+                return self._get_find_zip(path)
+            else:
+                # 仓库不存在
+                return None
 
+    # 获取相应的mod仓库内jar后缀的mod名单
+    def _get_find_zip(self, directory):
+        zip_files = []
+        for dirpath, dirnames, filenames in os.walk(directory):
+            for filename in filenames:
+                if filename.endswith(".jar"):
+                    zip_files.append(filename[:-4])
+        
+        # loop = asyncio.get_event_loop()
+        # loop.run_in_executor(None, self._mark_dictionrary, directory,zip_files)
+        self._mark_dictionrary(directory=directory, mod_list=zip_files)
+        return zip_files
+
+    # 访问相应的mod库并进行标记
+    def _mark_dictionrary(self,directory,mod_list):
+        mark_file = directory + "/" + "mod_information.json"
+        file_context = []
+        file_context.append({
+            "minecraft mod server version":"1.20.1",
+            "mod list":mod_list
+        })
+        with open(mark_file,'w',encoding="utf-8") as file:
+            json.dump(file_context, file, indent=4, ensure_ascii=False)
+            file.close()
+
+        return True
+
+    # 给所有mod仓库进行标记
+    def _traverse_mark_file(self, dicrectroy=None):
+        if dicrectroy == None:
+            # 直接进行默认索引
+            mod_list = self._get_all_table_modlist()
+            for mod in mod_list:
+                mod_path = self._get_mod_path() + '/' + str(mod)
+                # 获取当前mod库的mod清单
+                mod_library = self._get_find_zip(mod_path)
+                self._mark_dictionrary(mod_path, mod_library)
+                print(f"build mod request json fild:{str(mod)}")
+        else:
+            # 进行特殊索引
+            print("traverse")
+
+    # 检测是否存在当前的mod库
+    def mod_library_exisit(self,mod_library_name):
+        if len(mod_library_name) > 15:
+            return False
+        
+        facter,mod_list = self._get_table_mod_library(mod_library_name=mod_library_name)
+        if facter:
+            # 检测是否为空
+            if mod_list == []:
+                return False
+            else:
+                return True
+        else:
+            return False 
+
+    def _get_table_mod_library(self,mod_library_name):
+        try:
+            conn = sqlite3.connect(self.sqlite_path + '/' + self.database_name)
+            process = conn.cursor()
+
+            process.execute(f"""
+                SELECT * FROM {self.get_table_list()[0]} WHERE mod_library_link = ?;
+            """,(mod_library_name,))
+
+            rows = process.fetchall()
+
+            return True,rows
+        except Exception as e:
+            print(f"SELECT FROM TABLE TABLE[0] ERROR:{e}")
+            return False,e
 
 mod_sqlite_handler = ModHandleSqlite()
 
@@ -268,8 +369,8 @@ if __name__ == "__main__":
     #     modlink_name="4OZ1nvQVtCBwxyu")
 
     # 注册生成相应的mod库 有备注
-    remark = "暮色森林存档"
-    print(f"modListID:{mod_sqlite_handler._generate_file(remark=remark)}")
+    # remark = "暮色森林存档"
+    # print(f"modListID:{mod_sqlite_handler._generate_file(remark=remark)}")
 
     # 注册生成相应的mod库 无备注
     # print(f"modListID:{mod_sqlite_handler._generate_file()}")
@@ -279,3 +380,13 @@ if __name__ == "__main__":
 
     # 删除所有的mod库
     # mod_sqlite_handler._delete_sqlite_table_modlist_all()
+
+    # 查找相应mod库的mod
+    # mod =  mod_sqlite_handler._information_collection(select_mod_library="8ioVg5t6Yqv1t1c")
+    # print(mod)
+
+    # 给所有的mod库打标签
+    # mod_sqlite_handler._traverse_mark_file()
+
+    # 检测是否有记录在表内的数据库
+    print(mod_sqlite_handler.mod_library_exisit(mod_library_name="mod_library_name"))
