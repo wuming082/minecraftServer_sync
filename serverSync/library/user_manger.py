@@ -14,6 +14,25 @@ class UserAccountManger:
 
         # 初始化数据库
         self._init_user_circumstance()
+    
+    # 设置
+
+    # 用户存在认证
+    def user_exisit(self,username):
+        try:
+            conn = sqlite3.connect(self.user_database_path + '/' + self.user_database_name)
+            process = conn.cursor()
+
+            process.execute(f"SELECT * FROM {mod_sqlite_handler.get_table_list()[1]} WHERE username = ?;",(username))
+            username = process.fetchall()
+
+            if len(username) > 0:
+                return False # 表示不能注册
+            else:
+                return True # 表示可以注册
+        except Exception as e:
+            print(f"SELECT USER ACCOUNT EXISIT ERROR{e}")
+            return False
 
     # 初始化数据库函数
     def _init_user_circumstance(self):
@@ -130,6 +149,8 @@ class UserAccountManger:
         except Exception as e:
             print(f"ERROR INSERT USER:{e}")
             return False,e
+
+
 
 if __name__ == "__main__":
     mod_sqlite_handler.value_init_setpath()

@@ -18,6 +18,7 @@ class ModHandleSqlite:
         self.table_list = ["mod_library", "user_account","user_link"]
         self.database_name = "minecraft_sync.db"
 
+        self.verify_key = ""
         print(self.mod_list_path)
 
         self.mod_list_path_set = False
@@ -25,6 +26,13 @@ class ModHandleSqlite:
 
     def get_table_list(self):
         return self.table_list
+
+    # 设置verify
+    def set_verify_key(self,token):
+        self.verify_key = token
+    
+    def get_verify_key(self):
+        return self.verify_key
 
     # 提取相应的sqlite数据文件目录
     def get_sqlite_path_list(self):

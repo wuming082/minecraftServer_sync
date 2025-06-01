@@ -1,13 +1,13 @@
 <!-- LoginContainer.vue -->
 <template>
     <div id="background">
-        <img  id="background_img" src="../assets/docker-svgrepo-com.svg" alt="">
-            <div id="infomation"></div>
+        <!-- <img  id="background_img" src="../assets/docker-svgrepo-com.svg" alt=""> -->
+            <!-- <div id="infomation"></div> -->
             <!-- 登录界面 -->
             <div class="login-container" v-if="login_stauts">
                 <input id="userinput" v-model="credentials.username" type="text" placeholder="USERNAME" @keyup.enter="handleLogin">
                 <input id="passwordinput" v-model="credentials.password" type="text" placeholder="PASSWORD" @keyup.enter="handleLogin">
-                <h2 style="position: absolute; top: -10px;left: 20px; color: rgb(115, 115, 115);">CodeserverBuilder</h2>
+                <h2 style="position: absolute; top: -10px;left: 20px; color: rgb(115, 115, 115);">minecraft server sync</h2>
                 <p v-if="error" class="error">{{ error }}</p>
                 <img id="vscode" src="../assets/20200408094004334.png" alt="">
                 <!-- <img id="vscodeimg" src="../assets/loginvscode.png" alt=""> -->
@@ -27,7 +27,7 @@
                 <input id="emailinput" v-model="sign_inData.email" type="text" :style="{ border: refFindinput[2] }" placeholder="EMAIL" @keyup.enter="Sign_in">
                 <input id="Checkinput" v-model="sign_inData.check" type="text" :style="{ border: refFindinput[3] }" placeholder="邀请码" @keyup.enter="Sign_in">
                 <div id="sussces" style="font-weight: 900; position: absolute; top: 36px; color: #0f9125;" v-if="sussces_sgin">注册成功</div>
-                <h2 style="position: absolute; top: -10px;left: 20px; color: rgb(115, 115, 115);">CodeserverBuilder</h2>
+                <h2 style="position: absolute; top: -10px;left: 20px; color: rgb(115, 115, 115);">minecraft server sync</h2>
                 <p v-if="error" class="error">{{ error }}</p>
                 <img id="vscode" src="../assets/20200408094004334.png" alt="">
                 <!-- <img id="vscodeimg" src="../assets/loginvscode.png" alt=""> -->
@@ -76,13 +76,15 @@ export default {
                 'none',
                 'none',
                 'none'
-            ]
+            ],
+
+            test_process:"server.cooode.online:6730"
         };
     },
     methods: {
         async handleLogin() {
             try {
-                const response = await axios.post('http://baoding.dreamsky0822.asia:10000/login', this.credentials);
+                const response = await axios.post(`http://server.cooode.online:6730/login`, this.credentials);
                 const { token } = response.data;
                 localStorage.setItem('token', token); // 存储令牌
                 this.$router.push('/dashboard'); // 登录成功后重定向到仪表盘
@@ -111,7 +113,7 @@ export default {
         //注册用户函数
         async Sign_in() {
             try {
-                const response = await axios.post('http://baoding.dreamsky0822.asia:10000/sign_up', this.sign_inData);
+                const response = await axios.post(`http://${this.test_process}/enrollment`, this.sign_inData);
                 //注册成功业务逻辑
                 console.log(response);
                 this.error = null;
@@ -163,7 +165,7 @@ export default {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-100%, -50%); /* 使用 transform 来进行微调 */
+    transform: translate(-50%, -50%); /* 使用 transform 来进行微调 */
     box-shadow: 0px 0px 30px rgba(186, 186, 186, 0.5); /* 外阴影 */
     overflow: hidden;
 }
@@ -178,7 +180,7 @@ export default {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-100%, -50%); /* 使用 transform 来进行微调 */
+    transform: translate(-50%, -50%); /* 使用 transform 来进行微调 */
     box-shadow: 0px 0px 30px rgba(186, 186, 186, 0.5); /* 外阴影 */
     overflow: hidden;
 }
