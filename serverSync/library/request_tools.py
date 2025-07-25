@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask import send_from_directory
 from flask_cors import CORS
 import jwt
 import datetime
@@ -26,7 +27,27 @@ def generate_jwt():
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
 
-# 获取mod列表
+# 获取服务器状态
+@app.route("/server_status", methods=["GET"])
+def get_snycserver_status():
+    return jsonify({
+        "status": "health",
+        "log_engine": "health"
+    })
+
+# 开发环境测试函数(下载mod)
+@app.route("/mod_request_snyc/<mod_id>/<mod_name>", methods=["GET"])
+def get_snyc_mod_list(mod_id,mod_name):
+    print(mod_id,mod_name)
+    # 寻找下载途径
+    file_path = mod_sqlite_handler._get_mod_path() + '/' + mod_id
+    try:
+        return send_from_directory(file_path, path=mod_name, as_attachment=True)
+    except Exception as e:
+        print(str(e))
+        return str(e), 404
+
+# 获取所有mod仓库列表
 @app.route("/modlist", methods=["GET"])
 def get_mod_list():
     try:
@@ -35,6 +56,28 @@ def get_mod_list():
             "status": "success",
             "mod_list": mod_have
         })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+# 获取对应mod仓库的内部列表
+@app.route("/modlist_id/<mod_id>", methods=["GET"])
+def get_mod_list_id(mod_id):
+    try:
+        mod_have,check = mod_sqlite_handler._information_collection(select_mod_library=mod_id)
+        if check:
+            return jsonify({
+                "status": "success",
+                "mod_id": mod_id,
+                "mod_list": mod_have
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": str("NOT FOUND MOD ID")
+            }), 500
     except Exception as e:
         return jsonify({
             "status": "error",

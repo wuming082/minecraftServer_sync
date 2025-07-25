@@ -287,10 +287,10 @@ class ModHandleSqlite:
             path = self._get_mod_path() + "/" + select_mod_library
             if Path(path).exists():
                 # 仓库存在 检索相应的mod
-                return self._get_find_zip(path)
+                return self._get_find_zip(path),True
             else:
                 # 仓库不存在
-                return None
+                return None,False
 
     # 获取相应的mod仓库内jar后缀的mod名单
     def _get_find_zip(self, directory):
@@ -371,6 +371,7 @@ if __name__ == "__main__":
 
     # 初始化mod_manger （必要）
     mod_sqlite_handler.value_init_setpath()
+
 
     # 删除单独相应的mod库
     # mod_sqlite_handler._delete_sqlite_table_modlist_one(
