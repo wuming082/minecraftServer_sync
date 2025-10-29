@@ -98,6 +98,8 @@ def login():
         "token": token
     })
 
+
+# 注册请求路径函数
 @app.route("/enrollment", methods=["POST"])
 def enrollment():
     data = request.get_json()
@@ -131,6 +133,7 @@ def enrollment():
 
 if __name__ == "__main__":
     mod_sqlite_handler.value_init_setpath()
+
 
     
 
